@@ -88,7 +88,7 @@ mutual
 
   machineLoop : MachineIO (pounds, chocs)
   machineLoop =
-       do Just x <- GetInput | Nothig => do Display "Invalid input"
+       do Just x <- GetInput | Nothing => do Display "Invalid input"
                                             machineLoop
           case x of
               COIN => do InsertCoin
