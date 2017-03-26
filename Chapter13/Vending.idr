@@ -1,3 +1,5 @@
+-- Specify the state with a type, transitions with commands,
+-- and entry points with an enumerated type.
 VendState : Type
 VendState = (Nat, Nat)
 
@@ -31,6 +33,7 @@ namespace MachineDo
           (a -> Inf (MachineIO state2)) -> MachineIO state1
   (>>=) = Do
 
+-- Define the handlers and vending machine loop.
 mutual
   vend : MachineIO (pounds, chocs)
   vend {pounds = S p} {chocs = S c} = do Vend
@@ -60,6 +63,7 @@ mutual
                            machineLoop
               REFILL num => refill num
 
+-- A console interpreter for our vending machine, which is just one possible implementation.
 strToInput : String -> Maybe Input
 strToInput "insert" = Just COIN
 strToInput "vend" = Just VEND
