@@ -6,14 +6,6 @@ data Input = COIN
            | CHANGE 
            | REFILL Nat
 
-strToInput : String -> Maybe Input
-strToInput "insert" = Just COIN
-strToInput "vend" = Just VEND
-strToInput "change" = Just CHANGE
-strToInput x = if all isDigit (unpack x)
-                  then Just (REFILL (cast x))
-                  else Nothing
-
 data MachineCmd : Type -> VendState -> VendState -> Type where
      InsertCoin : MachineCmd () (pounds, chocs)     (S pounds, chocs)
      Vend       : MachineCmd () (S pounds, S chocs) (pounds, chocs)
@@ -33,37 +25,6 @@ data MachineCmd : Type -> VendState -> VendState -> Type where
 data MachineIO : VendState -> Type where
      Do : MachineCmd a state1 state2 ->
           (a -> Inf (MachineIO state2)) -> MachineIO state1
-
-runMachine : MachineCmd ty inState outState -> IO ty
-runMachine InsertCoin = putStrLn "Coin inserted"
-runMachine Vend = putStrLn "Please take your chocolate"
-runMachine {inState = (pounds, _)} GetCoins 
-     = putStrLn (show pounds ++ " coins returned")
-runMachine (Display str) = putStrLn str
-runMachine (Refill bars)
-     = putStrLn ("Chocolate remaining: " ++ show bars)
-runMachine {inState = (pounds, chocs)} GetInput
-     = do putStrLn ("Coins: " ++ show pounds ++ "; " ++
-                    "Stock: " ++ show chocs)
-          putStr "> "
-          x <- getLine
-          pure (strToInput x)
-runMachine (Pure x) = pure x
-runMachine (cmd >>= prog) = do x <- runMachine cmd
-                               runMachine (prog x)
-
-data Fuel = Dry | More (Lazy Fuel)
-
-partial
-forever : Fuel
-forever = More forever
-
-run : Fuel -> MachineIO state -> IO ()
-run (More fuel) (Do c f) 
-     = do res <- runMachine c
-          run fuel (f res)
-run Dry p = pure ()
-
 
 namespace MachineDo
   (>>=) : MachineCmd a state1 state2 ->
@@ -99,6 +60,43 @@ mutual
                            machineLoop
               REFILL num => refill num
 
+strToInput : String -> Maybe Input
+strToInput "insert" = Just COIN
+strToInput "vend" = Just VEND
+strToInput "change" = Just CHANGE
+strToInput x = if all isDigit (unpack x)
+                  then Just (REFILL (cast x))
+                  else Nothing
+
+runMachine : MachineCmd ty inState outState -> IO ty
+runMachine InsertCoin = putStrLn "Coin inserted"
+runMachine Vend = putStrLn "Please take your chocolate"
+runMachine {inState = (pounds, _)} GetCoins
+     = putStrLn (show pounds ++ " coins returned")
+runMachine (Display str) = putStrLn str
+runMachine (Refill bars)
+     = putStrLn ("Chocolate remaining: " ++ show bars)
+runMachine {inState = (pounds, chocs)} GetInput
+     = do putStrLn ("Coins: " ++ show pounds ++ "; " ++
+                    "Stock: " ++ show chocs)
+          putStr "> "
+          x <- getLine
+          pure (strToInput x)
+runMachine (Pure x) = pure x
+runMachine (cmd >>= prog) = do x <- runMachine cmd
+                               runMachine (prog x)
+
+data Fuel = Dry | More (Lazy Fuel)
+
+partial
+forever : Fuel
+forever = More forever
+
+run : Fuel -> MachineIO state -> IO ()
+run (More fuel) (Do c f)
+     = do res <- runMachine c
+          run fuel (f res)
+run Dry p = pure ()
+
 main : IO ()
 main = run forever (machineLoop {pounds = 0} {chocs = 1})
-
