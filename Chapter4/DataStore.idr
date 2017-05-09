@@ -40,7 +40,7 @@ getEntry pos store
     = let store_items = items store in
           case integerToFin pos (size store) of
                Nothing => Just ("Out of range\n", store)
-               Just id => Just (index id (items store) ++ "\n", store)
+               Just id => Just (index id store_items ++ "\n", store)
 
 processInput : DataStore -> String -> Maybe (String, DataStore)
 processInput store input
