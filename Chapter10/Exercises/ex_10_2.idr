@@ -43,5 +43,5 @@ palindrome input with (vList input)
   palindrome [] | VNil = True
   palindrome [x] | VOne = True
   palindrome (x :: (xs ++ [y])) | (VCons rec) 
-      = x == y && palindrome xs
+      = x == y && palindrome xs | rec
 
