@@ -17,6 +17,6 @@ main = do Just adder_id <- spawn adder
           Just chan <- connect adder_id
                | Nothing => putStrLn "Connection failed"
           ok <- unsafeSend chan (Add 2 3)
-          Just answer <- unsafeRecv String chan
+          Just answer <- unsafeRecv Nat chan
                | Nothing => putStrLn "Send failed"
           printLn answer
