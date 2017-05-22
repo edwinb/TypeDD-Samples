@@ -8,7 +8,7 @@ record WCData where
 doCount : (content : String) -> WCData
 doCount content = let lcount = length (lines content)
                       wcount = length (words content) in
-                      MkWCData lcount wcount
+                      MkWCData wcount lcount
 
 data WC = CountFile String
         | GetData String
