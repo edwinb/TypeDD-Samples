@@ -8,7 +8,6 @@ data Process : Type -> Type where
      Request : MessagePID -> Message -> Process (Maybe Nat)
      Respond : ((msg : Message) -> Process Nat) -> Process (Maybe Message)
      Spawn : Process () -> Process (Maybe MessagePID)
-     Loop : Inf (Process a) -> Process a
 
      Action : IO a -> Process a
      Pure : a -> Process a
@@ -34,7 +33,6 @@ run (Respond calc)
 run (Spawn proc) = do Just pid <- spawn (run proc)
                            | Nothing => pure Nothing
                       pure (Just (MkMessage pid))
-run (Loop action) = run action
 run (Action act) = act
 run (Pure val) = pure val
 run (act >>= next) = do x <- run act
