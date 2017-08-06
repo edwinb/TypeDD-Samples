@@ -92,7 +92,7 @@ forever = More forever
 
 run : Fuel -> Stream Int -> GameState -> ConsoleIO a ->
       IO (Maybe a, Stream Int, GameState)
-run fuel rnds state (Quit val) = do pure (Just val, rnds, state)
+run fuel rnds state (Quit val) = pure (Just val, rnds, state)
 run (More fuel) rnds state (Do c f)
      = do (res, newRnds, newState) <- runCommand rnds state c
           run fuel newRnds newState (f res)
